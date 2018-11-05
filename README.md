@@ -1,5 +1,5 @@
-# ansiblesingleplaybook-centos7php7
+# ansiblesingleplaybook-centos7php7  
 
-$ git clone 
-$ ansible-playbook -i hosts centos7php7-deploy.yml   
+$ git clone https://github.com/juffaz/ansiblesingleplaybook-centos7php7.git  
+$ ansible-playbook -i hosts centos7php7-deploy.yml  
 
