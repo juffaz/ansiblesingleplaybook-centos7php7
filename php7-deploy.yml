@@ -1,0 +1,42 @@
+---
+- hosts: frontend
+  tasks:
+    - name: 1.Check if EPEL repo is already configured.
+      stat: path=/etc/yum.repos.d/epel.repo
+      register: epel_repofile_result
+
+    - name: 2.Install EPEL repo.
+      yum: name="https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm" state=present
+      register: result
+      when: not epel_repofile_result.stat.exists
+
+    - name: 3.Import EPEL GPG key.
+      rpm_key: key="https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7" state=present
+      when: not epel_repofile_result.stat.exists
+
+    - name: 4.Install WEBTATIC repo.
+      yum: name="https://mirror.webtatic.com/yum/el7/webtatic-release.rpm" state=present
+      register: result
+     # when: not webtatic_repofile_result.stat.exists
+
+    - name: 5.Install apache,modsec
+      yum: name={{item}} state=installed
+      with_items:
+        - httpd
+        - httpd-devel
+        - httpd-tools
+        - mod_security
+        - mod_security_crs
+
+    - name: 6.Install php7,npm
+      yum: name={{item}} state=installed
+      with_items:
+        - php71w-common
+        - mod_php71w
+        - php71w-cli
+        - php71w-gd
+        - php71w-xml
+        - php71w-pdo
+        - php71w-mcrypt
+        - php71w-mysqlnd
+        - php71w-mbstring
