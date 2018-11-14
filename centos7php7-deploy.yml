@@ -67,3 +67,38 @@
         state: file
       tags: composer
 
+    - name: mkdir ssl apache
+      file: path=/etc/httpd/conf/ssl/ state=directory 
+
+    - name: mkdir public apache
+      file: path=/var/www/html/public/ state=directory
+
+    - name: copy httpd conf 
+      copy: src=files/frontend/mydomain.conf dest=/etc/httpd/conf.d/mydomain.conf
+     # when: inventory_hostname == ""
+
+    - name: copy httpd priv key
+      copy: src=files/frontend/www_mydomain_RSA_private.key dest=/etc/httpd/conf/ssl/www_mydomain_RSA_private.key
+     # when: inventory_hostname == ""
+
+    - name: copy httpd cer
+      copy: src=files/frontend/www_mydomain_RSA_intermediate.cer dest=/etc/httpd/conf/ssl/www_mydomain_RSA_intermediate.cer
+     # when: inventory_hostname == ""
+
+    - name: copy httpd rsa cer
+      copy: src=files/frontend/www_mydomain_RSA.cer dest=/etc/httpd/conf/ssl/www_mydomain_RSA.cer
+     # when: inventory_hostname == ""
+
+    - name: start httpd service
+      systemd: state=restarted enabled=yes name=httpd daemon_reload=yes
+
+    - name: make sure daemon is reloaded (ansible bug)
+      shell: systemctl daemon-reload
+
+    - name: insert firewalld rule for haproxy http port
+      firewalld: port={{ 80 }}/tcp permanent=true state=enabled immediate=yes
+      when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'"
+
+    - name: insert firewalld rule for haproxy https port
+      firewalld: port={{ 443 }}/tcp permanent=true state=enabled immediate=yes
+      when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'"
